@@ -11,7 +11,9 @@ void getTimeDs1307(DateTimeRtc &dt);
 void confTimeDs1307(DateTimeRtc &dt);
 
 void printTime(DateTimeRtc &dt, uint8_t offset);
-void printClockHud(uint8_t offset);
+void printClockHud(uint8_t offset, boolean &shownHud);
+void printCursor(uint8_t idx, uint8_t offset, boolean &shownCursor);
+void noCursor(boolean &shownCursor);
 
 void onModeBtnClicked(EventButton &eb);
 void onUpBtnClicked(EventButton &eb);
@@ -65,7 +67,8 @@ const uint8_t refreshIntervalInputRead = 10;
 uint8_t mode = 0;
 uint8_t confTimeIndex = 0;
 
-boolean hudDisplayed = false;
+boolean shownHud = false;
+boolean shownCursor = false;
 
 void setup()
 {
@@ -106,10 +109,9 @@ void loop()
 
     if (mode == MODE_CLOCK) {
       // Display HUD
-      if (!hudDisplayed) {
-        printClockHud(LCD_OFFSET);
-        hudDisplayed = true;
-      }
+      printClockHud(LCD_OFFSET, shownHud);
+
+      noCursor(shownCursor);
 
       // Get and Print current time
       getTimeDs1307(currentTimeObj);
@@ -125,6 +127,7 @@ void loop()
     if (mode == MODE_SETUP) {
       // Reuse init time object for configs
       printTime(initDt, LCD_OFFSET);
+      printCursor(confTimeIndex, LCD_OFFSET, shownCursor);
     }
 
   }
@@ -170,9 +173,15 @@ void printTime(DateTimeRtc &dt, uint8_t offset) {
   }
 }
 
-// TODO: Optimize
-void printClockHud(uint8_t offset)
+
+void printClockHud(uint8_t offset, boolean &shownHud)
 {
+
+  if (shownHud) {
+    return;
+  }
+
+  // TODO: Optimize
   lcd.setCursor(2 + offset, 0);
   lcd.print(":");
   lcd.setCursor(5 + offset, 0);
@@ -182,6 +191,31 @@ void printClockHud(uint8_t offset)
   lcd.print("-");
   lcd.setCursor(5 + offset, 1);
   lcd.print("-");
+
+  shownHud = true;
+}
+
+void printCursor(uint8_t idx, uint8_t offset, boolean &shownCursor)
+{
+  lcd.setCursor(LCD_MAPPINGS[idx][0] + offset + 1, LCD_MAPPINGS[idx][1]);
+  
+  if (shownCursor) {
+    return;
+  }
+  
+  lcd.cursor();
+  shownCursor = true;
+  
+}
+
+void noCursor(boolean &shownCursor)
+{
+  if (!shownCursor) {
+    return;
+  }
+
+  lcd.noCursor();
+  shownCursor = false;
 }
 
 void onModeBtnClicked(EventButton &eb)
