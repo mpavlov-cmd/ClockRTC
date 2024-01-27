@@ -9,15 +9,22 @@
 // Function declarations
 void getTimeDs1307(DateTimeRtc &dt);
 void confTimeDs1307(DateTimeRtc &dt);
-void printTime(DateTimeRtc &dt);
 
-// TODO: Replace EventButton with Bounce2 lib
+void printTime(DateTimeRtc &dt, uint8_t offset);
+void printClockHud(uint8_t offset);
+
 void onModeBtnClicked(EventButton &eb);
 void onUpBtnClicked(EventButton &eb);
 void onDownBtnClicked(EventButton &eb);
 
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
+const uint8_t MODE_CLOCK = 0;
+const uint8_t MODE_SETUP = 1;
+
+// Maps LCD Cursor to a given position on 16/2 screet
+const uint8_t LCD_MAPPINGS[6][2] = {{0, 0}, {3, 0}, {6, 0}, {0, 1}, {3, 1}, {6, 1}};
+const uint8_t LCD_OFFSET = 4;
 
 // Setup LCD with shift register
 /*
@@ -55,15 +62,10 @@ const uint8_t refreshIntervalClockMode = 200;
 unsigned long timeEllapsedInputRead = 0;
 const uint8_t refreshIntervalInputRead = 10;
 
-/* Modes
-  0 - clock
-  1 - confTime
-*/
-const uint8_t MODE_CLOCK = 0;
-const uint8_t MODE_SETUP = 1;
-
 uint8_t mode = 0;
 uint8_t confTimeIndex = 0;
+
+boolean hudDisplayed = false;
 
 void setup()
 {
@@ -103,9 +105,15 @@ void loop()
     timeEllapsedClockRefresh = currentMillis;
 
     if (mode == MODE_CLOCK) {
+      // Display HUD
+      if (!hudDisplayed) {
+        printClockHud(LCD_OFFSET);
+        hudDisplayed = true;
+      }
+
       // Get and Print current time
       getTimeDs1307(currentTimeObj);
-      printTime(currentTimeObj);
+      printTime(currentTimeObj, LCD_OFFSET);
     }
   }
 
@@ -116,7 +124,7 @@ void loop()
 
     if (mode == MODE_SETUP) {
       // Reuse init time object for configs
-      printTime(initDt);
+      printTime(initDt, LCD_OFFSET);
     }
 
   }
@@ -142,10 +150,11 @@ void confTimeDs1307(DateTimeRtc &dt)
   rtcWrite(REG_YEAR,  intToBcd(dt.byIndex(5)));
 }
 
-void printTime(DateTimeRtc &dt) {
+void printTime(DateTimeRtc &dt, uint8_t offset) {
   uint8_t mask = dt.getMask();
-  printBcd(mask);
-  for (int i = 0; i<6; i++) {
+  
+  // printBcd(mask);
+  for (int i = 0; i < 6; i++) {
     uint8_t changed = bitRead(mask, i);
     // If no changes continue 
     if (changed == 0) {
@@ -155,37 +164,28 @@ void printTime(DateTimeRtc &dt) {
     char printVal[3];
     sprintf(printVal, "%02d", dt.byIndex(i));
 
-    switch (i)
-    {
-    case 0: // Hour
-      lcd.setCursor(0, 0);
-      break;
-    case 1: // Min 
-      lcd.setCursor(3, 0);
-      break;
-    case 2: // Sec
-      lcd.setCursor(6, 0);
-      break;
-    case 3: // Year
-      lcd.setCursor(0, 1);
-      break;
-    case 4:
-      lcd.setCursor(3, 1);
-      break;
-    case 5:
-      lcd.setCursor(6, 1);
-      break;
-    default:
-      break;
-    }
-
+    lcd.setCursor(LCD_MAPPINGS[i][0] + offset, LCD_MAPPINGS[i][1]);
     lcd.print(printVal);
     dt.flushMask();
   }
 }
 
-void onModeBtnClicked(EventButton &eb)
+// TODO: Optimize
+void printClockHud(uint8_t offset)
 {
+  lcd.setCursor(2 + offset, 0);
+  lcd.print(":");
+  lcd.setCursor(5 + offset, 0);
+  lcd.print(":");
+
+  lcd.setCursor(2 + offset, 1);
+  lcd.print("-");
+  lcd.setCursor(5 + offset, 1);
+  lcd.print("-");
+}
+
+void onModeBtnClicked(EventButton &eb)
+{ 
   // Go from mode 1 to mode 2
   if (mode == MODE_CLOCK) {
     mode++;
