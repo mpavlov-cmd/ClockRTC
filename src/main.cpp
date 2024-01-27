@@ -49,15 +49,21 @@ EventButton downBunnon(3);
 EventButton modeButton(4);
 
 // Store milliseconds
-unsigned long timeEllapsed = 0;
-const unsigned long lcdRefreshIntervalMills = 200;
+unsigned long timeEllapsedClockRefresh = 0;
+const uint8_t refreshIntervalClockMode = 200;
+
+unsigned long timeEllapsedInputRead = 0;
+const uint8_t refreshIntervalInputRead = 10;
 
 /* Modes
   0 - clock
-  1 - set clock
-  1 - alarm 1
+  1 - confTime
 */
+const uint8_t MODE_CLOCK = 0;
+const uint8_t MODE_SETUP = 1;
 
+uint8_t mode = 0;
+uint8_t confTimeIndex = 0;
 
 void setup()
 {
@@ -90,15 +96,29 @@ void loop()
   upButton.update();
   downBunnon.update();
 
-  if (currentMillis - timeEllapsed >= lcdRefreshIntervalMills)
+  // Refresh screen in clock mode
+  if (currentMillis - timeEllapsedClockRefresh >= refreshIntervalClockMode)
   {
-    // Update time Ellapsed
-    timeEllapsed = currentMillis;
+    // Update time ellapsed
+    timeEllapsedClockRefresh = currentMillis;
 
-    // Print time to LCD
-    getTimeDs1307(currentTimeObj);
+    if (mode == MODE_CLOCK) {
+      // Get and Print current time
+      getTimeDs1307(currentTimeObj);
+      printTime(currentTimeObj);
+    }
+  }
 
-    printTime(currentTimeObj);
+  // Refresh screen in setup mode
+  if (currentMillis - timeEllapsedInputRead >= refreshIntervalInputRead) {
+    // Update time ellapsed
+    timeEllapsedInputRead = currentMillis;
+
+    if (mode == MODE_SETUP) {
+      // Reuse init time object for configs
+      printTime(initDt);
+    }
+
   }
 }
 
@@ -132,7 +152,6 @@ void printTime(DateTimeRtc &dt) {
       continue;
     }
     // Changed
-    // Hours 
     char printVal[3];
     sprintf(printVal, "%02d", dt.byIndex(i));
 
@@ -167,11 +186,35 @@ void printTime(DateTimeRtc &dt) {
 
 void onModeBtnClicked(EventButton &eb)
 {
-  Serial.println("Mode Btn Clicked");
+  // Go from mode 1 to mode 2
+  if (mode == MODE_CLOCK) {
+    mode++;
+    return;
+  }
+
+  // If mode is confTime iterate through values
+  if (mode == MODE_SETUP) {
+    confTimeIndex++;
+
+    // Switch back to clock;
+    if (confTimeIndex == 6) {
+      confTimeIndex = 0;
+      mode = MODE_CLOCK;
+      // Forse screen refresh
+      currentTimeObj.forseMask();
+    }
+  }
+
+  Serial.println(mode);
+  Serial.println(confTimeIndex);
 }
+
 void onUpBtnClicked(EventButton &eb)
 {
-  Serial.println("Up Btn Clicked");
+  if (mode == MODE_SETUP) {
+    uint8_t currentValue = initDt.byIndex(confTimeIndex);
+    initDt.setValue(currentValue + 1, confTimeIndex);
+  }
 }
 void onDownBtnClicked(EventButton &eb)
 {

@@ -16,14 +16,15 @@ struct DateTimeRtc {
         DateTimeRtc();
 
         void setValue(uint8_t value, uint8_t index);
+        
         uint8_t getMask();
+        void forseMask();
         void flushMask();
 
         void asTimeString(char *message);
         void asDateString(char *message);
 
         uint8_t& byIndex(uint8_t idx);
-
 };
 
 #endif  // DATETIMERCT_H

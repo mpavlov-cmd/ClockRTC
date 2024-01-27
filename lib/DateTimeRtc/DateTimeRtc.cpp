@@ -37,6 +37,11 @@ uint8_t DateTimeRtc::getMask()
     return changeMask;
 }
 
+void DateTimeRtc::forseMask()
+{
+    changeMask = FULL_MASK;
+}
+
 void DateTimeRtc::flushMask()
 {
     changeMask = ZERO_MASK;
