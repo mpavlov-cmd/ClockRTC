@@ -12,12 +12,14 @@ void confTimeDs1307(DateTimeRtc &dt);
 
 void printTime(DateTimeRtc &dt, uint8_t offset);
 void printClockHud(uint8_t offset, boolean &shownHud);
-void printCursor(uint8_t idx, uint8_t offset, boolean &shownCursor);
-void noCursor(boolean &shownCursor);
+void printCursor(uint8_t idx, uint8_t offset);
 
 void onModeBtnClicked(EventButton &eb);
+void onModeBtnHeld(EventButton &eb);
 void onUpBtnClicked(EventButton &eb);
 void onDownBtnClicked(EventButton &eb);
+
+void onModeChanged(uint8_t mode);
 
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
@@ -68,7 +70,6 @@ uint8_t mode = 0;
 uint8_t confTimeIndex = 0;
 
 boolean shownHud = false;
-boolean shownCursor = false;
 
 void setup()
 {
@@ -88,6 +89,7 @@ void setup()
   lcd.begin(16, 2);
 
   modeButton.setClickHandler(onModeBtnClicked);
+  modeButton.setLongClickHandler(onModeBtnHeld);
   upButton.setClickHandler(onUpBtnClicked);
   downBunnon.setClickHandler(onDownBtnClicked);
 }
@@ -111,8 +113,6 @@ void loop()
       // Display HUD
       printClockHud(LCD_OFFSET, shownHud);
 
-      noCursor(shownCursor);
-
       // Get and Print current time
       getTimeDs1307(currentTimeObj);
       printTime(currentTimeObj, LCD_OFFSET);
@@ -127,7 +127,7 @@ void loop()
     if (mode == MODE_SETUP) {
       // Reuse init time object for configs
       printTime(initDt, LCD_OFFSET);
-      printCursor(confTimeIndex, LCD_OFFSET, shownCursor);
+      printCursor(confTimeIndex, LCD_OFFSET);
     }
 
   }
@@ -195,17 +195,9 @@ void printClockHud(uint8_t offset, boolean &shownHud)
   shownHud = true;
 }
 
-void printCursor(uint8_t idx, uint8_t offset, boolean &shownCursor)
+void printCursor(uint8_t idx, uint8_t offset)
 {
   lcd.setCursor(LCD_MAPPINGS[idx][0] + offset + 1, LCD_MAPPINGS[idx][1]);
-  
-  if (shownCursor) {
-    return;
-  }
-  
-  lcd.cursor();
-  shownCursor = true;
-  
 }
 
 void noCursor(boolean &shownCursor)
@@ -223,10 +215,11 @@ void onModeBtnClicked(EventButton &eb)
   // Go from mode 1 to mode 2
   if (mode == MODE_CLOCK) {
     mode++;
+    onModeChanged(mode);
     return;
   }
 
-  // If mode is confTime iterate through values
+  // If mode is MODE_SETUP iterate through values
   if (mode == MODE_SETUP) {
     confTimeIndex++;
 
@@ -234,13 +227,23 @@ void onModeBtnClicked(EventButton &eb)
     if (confTimeIndex == 6) {
       confTimeIndex = 0;
       mode = MODE_CLOCK;
-      // Forse screen refresh
-      currentTimeObj.forseMask();
+      onModeChanged(mode);
     }
   }
 
   Serial.println(mode);
   Serial.println(confTimeIndex);
+}
+
+void onModeBtnHeld(EventButton &eb)
+{
+  if (mode == MODE_SETUP) {
+    // Write data to chip and return back to clock mode
+    confTimeDs1307(initDt);
+    mode = MODE_CLOCK;
+    onModeChanged(mode);
+    return;
+  }
 }
 
 void onUpBtnClicked(EventButton &eb)
@@ -253,4 +256,22 @@ void onUpBtnClicked(EventButton &eb)
 void onDownBtnClicked(EventButton &eb)
 {
   Serial.println("Down Btn Clicked");
+}
+
+void onModeChanged(uint8_t mode)
+{
+  // Entered clock mode
+  if (mode == MODE_CLOCK)
+  {
+    // Force clock refresh 
+    currentTimeObj.forseMask();
+    // Remove cursor
+    lcd.noCursor();
+  }
+
+  if (mode == MODE_SETUP)
+  {
+    initDt.forseMask();
+    lcd.cursor();
+  }
 }

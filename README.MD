@@ -1,2 +1,10 @@
-Original Proteus File:
-C:\Users\Maxim\AppData\Local\Temp\VSM Studio\3f8649f2943749e7831bb6b6bbe643ea\ARDUINO_UNO_1\Release\Release.elf
+# Clock project for Arduino 
+
+Custom LCD Chars: 
+https://maxpromer.github.io/LCD-Character-Creator/
+
+## TODO List
+- Add HUD in 2 modes
+- Add alarm feature
+- Display day of week
+- Manage LCD backlight - turn on for x seconds when any button is clicked
