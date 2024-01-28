@@ -52,7 +52,7 @@ LiquidCrystal_74HC595 lcd(11, 12, 10, 1, 3, 4, 5, 6, 7);
 
 // Init Date Time Objects
 // HH-MM-SS DD-MM-YY
-DateTimeRtc initDt(12, 00, 00, 01, 01, 24);
+DateTimeRtc initDt(23, 59, 55, 31, 12, 99);
 DateTimeRtc currentTimeObj;
 
 // Buttons
@@ -236,7 +236,11 @@ void onUpBtnClicked(EventButton &eb)
 
 void onDownBtnClicked(EventButton &eb)
 {
-  Serial.println("Down Btn Clicked");
+  if (mode == MODE_SETUP)
+  {
+    uint8_t currentValue = initDt.byIndex(confTimeIndex);
+    initDt.setValue(currentValue - 1, confTimeIndex);
+  }
 }
 
 void onModeChanged(uint8_t mode)
