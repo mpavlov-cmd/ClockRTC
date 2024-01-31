@@ -1,6 +1,8 @@
 #ifndef ICONS_H
 #define ICONS_H
 
+#pragma once
+
 #include <Arduino.h>
 
 const uint8_t CHAR_ARROW_UP_IDX = 0;

@@ -18,8 +18,10 @@ struct ClockMode {
         unsigned int refInt;
         unsigned long timeEllapsed = 0;
 
-        // Common logic for OnRefresh
+        // Common logic 
         boolean shouldRefresh(unsigned long mills);
+        // To be implemeted for specific IC to store time to
+        void toRtc();
 
     public:
 

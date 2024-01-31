@@ -1,10 +1,18 @@
 #include "ClockConf.h"
 #include <LcdUtils.h>
 #include <DS1307M.h>
-// #include <Icons.h>
+#include <Icons.h>
 
-ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval) 
-     : ClockMode(liqudCristal, dateTime, refreshInterval) {}
+ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
+    : ClockMode(liqudCristal, dateTime, refreshInterval)
+{
+    // Setup custom chars
+    lcd.createChar(CHAR_ARROW_UP_IDX, CHAR_ARROW_UP);
+    lcd.createChar(CHAR_ARROW_DOWN_IDX, CHAR_ARROW_DOWN);
+
+    // Write initial time to the IC
+    toRtc();
+}
 
 void ClockConf::onRefresh(unsigned long mills)
 {
@@ -26,9 +34,10 @@ void ClockConf::onModeEnter()
     lcd.clear();
     lcd.cursor();
 
-    // TODO: Fix icons inport
-    darwIcon(lcd, 0, 0, 0);
-    darwIcon(lcd, 0, 1, 1);
+    darwIcon(lcd, 0, 0, CHAR_ARROW_UP_IDX);
+    darwIcon(lcd, 0, 1, CHAR_ARROW_DOWN_IDX);
+
+    dt.forseMask();
 }
 
 void ClockConf::onModeBtnClicked(uint8_t &mode)
@@ -43,16 +52,15 @@ void ClockConf::onModeBtnClicked(uint8_t &mode)
 
 void ClockConf::onModeBtnHeld(uint8_t &mode)
 {
-    // Write time from dt to RTC
-    rtcWrite(REG_HOUR, intToBcd(dt.byIndex(0)));
-    rtcWrite(REG_MIN, intToBcd(dt.byIndex(1)));
-    rtcWrite(REG_SEC, intToBcd(dt.byIndex(2)));
-    rtcWrite(REG_DAY, intToBcd(dt.byIndex(3)));
-    rtcWrite(REG_MONTH, intToBcd(dt.byIndex(4)));
-    rtcWrite(REG_YEAR, intToBcd(dt.byIndex(5)));
 
-    confIdx = 0;
-    mode++;
+    Serial.println("HELD");
+
+    // Write time from dt to RTC
+    toRtc();
+
+    // TODO: Figure out how to change mode
+    // confIdx = 0;
+    // mode++;
 }
 
 void ClockConf::onUpBtnClicked()
