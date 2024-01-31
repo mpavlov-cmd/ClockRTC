@@ -8,6 +8,8 @@
 #include <Icons.h>
 #include <LcdUtils.h>
 
+#include <Clock.h>
+
 // Function declarations
 void getTimeDs1307(DateTimeRtc &dt);
 void confTimeDs1307(DateTimeRtc &dt);
@@ -72,6 +74,11 @@ uint8_t confTimeIndex = 0;
 
 boolean shownHud = false;
 
+ClockMode* clock  = new Clock(lcd, initDt, 500);
+ClockMode* clock2 = new Clock(lcd, initDt, 250);
+
+ClockMode* modes[] = {clock, clock2};
+
 void setup()
 {
   // TODO: Remove
@@ -108,21 +115,22 @@ void loop()
   downBunnon.update();
 
   // Refresh screen in clock mode
-  if (currentMillis - timeEllapsedClockRefresh >= refreshIntervalClockMode)
-  {
-    // Update time ellapsed
-    timeEllapsedClockRefresh = currentMillis;
+  // if (currentMillis - timeEllapsedClockRefresh >= refreshIntervalClockMode)
+  // {
+  //   // Update time ellapsed
+  //   timeEllapsedClockRefresh = currentMillis;
 
     if (mode == MODE_CLOCK)
     {
-      // Display HUD
-      printClockHud(lcd, shownHud, LCD_OFFSET);
+      // // Display HUD
+      // printClockHud(lcd, shownHud, LCD_OFFSET);
 
-      // Get and Print current time
-      getTimeDs1307(currentTimeObj);
-      printTime(currentTimeObj, LCD_OFFSET);
+      // // Get and Print current time
+      // getTimeDs1307(currentTimeObj);
+      // printTime(currentTimeObj, LCD_OFFSET);
+      modes[0]->onRefresh(currentMillis);
     }
-  }
+  // }
 
   // Refresh screen in setup mode
   if (currentMillis - timeEllapsedInputRead >= refreshIntervalInputRead)
