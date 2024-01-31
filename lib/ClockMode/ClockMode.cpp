@@ -6,3 +6,13 @@ ClockMode::ClockMode(
     unsigned int refreshInterval) : lcd(liqudCristal), dt(dateTime), refInt(refreshInterval)
 {
 }
+
+boolean ClockMode::shouldRefresh(unsigned long mills)
+{
+    boolean result = mills - timeEllapsed >= refInt;
+    if (result) {
+        timeEllapsed = mills;
+    }
+
+    return result;
+}

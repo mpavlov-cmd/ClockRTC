@@ -1,17 +1,18 @@
-#ifndef CLOCK_H
-#define CLOCK_H
+#ifndef CLOCKCONF_H
+#define CLOCKCONF_H
 
 #pragma once
 
 #include <ClockMode.h>
 
-struct Clock : public ClockMode {
+struct ClockConf : public ClockMode {
 
         private:
             boolean isHoodSHown = false; 
+            uint8_t confIdx = 0;
 
         public:
-            Clock(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
+            ClockConf(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
 
             void onRefresh(unsigned long mills) override;
             void onModeEnter() override;
