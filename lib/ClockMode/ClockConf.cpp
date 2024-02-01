@@ -52,15 +52,11 @@ void ClockConf::onModeBtnClicked(uint8_t &mode)
 
 void ClockConf::onModeBtnHeld(uint8_t &mode)
 {
-
-    Serial.println("HELD");
-
     // Write time from dt to RTC
     toRtc();
 
-    // TODO: Figure out how to change mode
-    // confIdx = 0;
-    // mode++;
+    confIdx = 0;
+    mode++;
 }
 
 void ClockConf::onUpBtnClicked()

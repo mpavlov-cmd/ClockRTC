@@ -9,10 +9,11 @@
 #include <ClockConf.h>
 
 // Function declarations
-void onModeBtnClicked(EventButton &eb);
-void onModeBtnHeld(EventButton &eb);
 void onUpBtnClicked(EventButton &eb);
 void onDownBtnClicked(EventButton &eb);
+void onModeBtnClicked(EventButton &eb);
+void onModeBtnHeld(EventButton &eb);
+void handleModeChange(uint8_t srcMode, uint8_t &modeIdx);
 
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
@@ -88,28 +89,6 @@ void loop()
   modes[modeIdx]->onRefresh(currentMillis);
 }
 
-void onModeBtnClicked(EventButton &eb)
-{
-  // Store current mode 
-  uint8_t currentMode = modeIdx;
-  // Handle mode button click by delegate
-  modes[modeIdx]->onModeBtnClicked(modeIdx);
-
-  if (currentMode != modeIdx) {
-    // Mode changed, check out of bounds
-    if (modeIdx > MODES_COUNT - 1) {
-      modeIdx = 0;
-    }
-    // Fire onModeEnter for the next mode
-    modes[modeIdx]->onModeEnter();
-  }
-}
-
-void onModeBtnHeld(EventButton &eb)
-{
-  modes[modeIdx]->onModeBtnHeld(modeIdx);
-}
-
 void onUpBtnClicked(EventButton &eb)
 {
   modes[modeIdx]->onUpBtnClicked();
@@ -118,4 +97,34 @@ void onUpBtnClicked(EventButton &eb)
 void onDownBtnClicked(EventButton &eb)
 {
   modes[modeIdx]->onDownBtnClicked();
+}
+
+void onModeBtnClicked(EventButton &eb)
+{
+  // Store current mode 
+  uint8_t currentMode = modeIdx;
+  modes[modeIdx]->onModeBtnClicked(modeIdx);
+  handleModeChange(currentMode, modeIdx);
+}
+
+void onModeBtnHeld(EventButton &eb)
+{
+  // Store current mode 
+  uint8_t currentMode = modeIdx;
+  modes[modeIdx]->onModeBtnHeld(modeIdx);
+  handleModeChange(currentMode, modeIdx);
+}
+
+void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
+{
+  if (srcMode != modeIdx)
+  {
+    // Mode changed, check out of bounds
+    if (modeIdx > MODES_COUNT - 1)
+    {
+      modeIdx = 0;
+    }
+    // Fire onModeEnter for the next mode
+    modes[modeIdx]->onModeEnter();
+  }
 }
