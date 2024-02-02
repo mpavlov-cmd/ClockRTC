@@ -7,6 +7,8 @@
 #include <DS1307M.h>
 #include <Clock.h>
 #include <ClockConf.h>
+#include <Buzzer.h>
+#include <Timed.h>
 
 // Function declarations
 void onUpBtnClicked(EventButton &eb);
@@ -14,6 +16,7 @@ void onDownBtnClicked(EventButton &eb);
 void onModeBtnClicked(EventButton &eb);
 void onModeBtnHeld(EventButton &eb);
 void handleModeChange(uint8_t srcMode, uint8_t &modeIdx);
+void lightAndBeep();
 
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
@@ -41,6 +44,11 @@ LiquidCrystal_74HC595 lcd(11, 12, 10, 1, 3, 4, 5, 6, 7);
 EventButton upButton(2);
 EventButton downBunnon(3);
 EventButton modeButton(4);
+
+// Buzzer PIN5
+Buzzer buzzer(5, true);
+// Backlight PIN6
+Timed backlight(6, true);
 
 // Init Date Time Objects
 // HH-MM-SS DD-MM-YY
@@ -86,21 +94,27 @@ void loop()
   upButton.update();
   downBunnon.update();
 
+  buzzer.update(currentMillis);
+  backlight.update(currentMillis);
+
   modes[modeIdx]->onRefresh(currentMillis);
 }
 
 void onUpBtnClicked(EventButton &eb)
 {
+  lightAndBeep();
   modes[modeIdx]->onUpBtnClicked();
 }
 
 void onDownBtnClicked(EventButton &eb)
 {
+  lightAndBeep();
   modes[modeIdx]->onDownBtnClicked();
 }
 
 void onModeBtnClicked(EventButton &eb)
 {
+  lightAndBeep();
   // Store current mode 
   uint8_t currentMode = modeIdx;
   modes[modeIdx]->onModeBtnClicked(modeIdx);
@@ -109,7 +123,8 @@ void onModeBtnClicked(EventButton &eb)
 
 void onModeBtnHeld(EventButton &eb)
 {
-  // Store current mode 
+  lightAndBeep();
+  // Store current mode
   uint8_t currentMode = modeIdx;
   modes[modeIdx]->onModeBtnHeld(modeIdx);
   handleModeChange(currentMode, modeIdx);
@@ -127,4 +142,10 @@ void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
     // Fire onModeEnter for the next mode
     modes[modeIdx]->onModeEnter();
   }
+}
+
+void lightAndBeep()
+{
+  buzzer.up(50);
+  backlight.up(2000);
 }
