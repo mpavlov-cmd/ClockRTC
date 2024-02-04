@@ -1,12 +1,21 @@
 #include "LcdUtils.h"
 
-void printTimeDate(LiquidCrystal_74HC595 &lcd, DateTimeRtc &dt, const uint8_t mappings[6][2], uint8_t offset)
+boolean printTimeDate(LiquidCrystal_74HC595 &lcd, DateTimeRtc &dt, const uint8_t mappings[6][2], uint8_t offset)
 {
     uint8_t mask = dt.getMask();
+    boolean printed = false;
 
     // printBcd(mask);
     for (int i = 0; i < 6; i++)
     {
+        uint8_t col = mappings[i][0];
+        uint8_t row = mappings[i][1];
+
+        // Skip position to allow different mappings
+        if (col == UINT8_MAX || row == UINT8_MAX) {
+            continue;
+        }
+
         uint8_t changed = bitRead(mask, i);
         // If no changes continue
         if (changed == 0)
@@ -14,13 +23,17 @@ void printTimeDate(LiquidCrystal_74HC595 &lcd, DateTimeRtc &dt, const uint8_t ma
             continue;
         }
         // Changed
+        printed = true;
         char printVal[3];
         sprintf(printVal, "%02d", dt.byIndex(i));
 
-        lcd.setCursor(mappings[i][0] + offset, mappings[i][1]);
+        lcd.setCursor(col + offset, row);
         lcd.print(printVal);
-        dt.flushMask();
     }
+
+    dt.flushMask();
+
+    return printed;
 }
 
 void printClockHud(LiquidCrystal_74HC595 &lcd, boolean &shownHud, uint8_t offset)

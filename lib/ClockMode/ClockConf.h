@@ -9,7 +9,24 @@ struct ClockConf : public ClockMode {
 
         private:
             boolean isHoodSHown = false; 
+            boolean editMode    = false;
             uint8_t confIdx = 0;
+
+            boolean switchedToEdit() {
+                if (editMode) {
+                    return false;
+                }
+
+                positionCursor();
+                lcd.cursor();
+                editMode = true;
+
+                return true;
+            }
+
+            void positionCursor() {
+                lcd.setCursor(LCD_DT_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_DT_MAP[confIdx][1]);
+            }
 
         public:
             ClockConf(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 

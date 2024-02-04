@@ -6,6 +6,7 @@
 ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
     : ClockMode(liqudCristal, dateTime, refreshInterval)
 {
+    // TODO: Needed in different modes, move to common code
     // Setup custom chars
     lcd.createChar(CHAR_ARROW_UP_IDX, CHAR_ARROW_UP);
     lcd.createChar(CHAR_ARROW_DOWN_IDX, CHAR_ARROW_DOWN);
@@ -23,16 +24,19 @@ void ClockConf::onRefresh(unsigned long mills)
     }
 
     printClockHud(lcd, isHoodSHown, LCD_OFFSET);
-    printTimeDate(lcd, dt, LCD_DT_MAP, LCD_OFFSET);
-
-    lcd.setCursor(LCD_DT_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_DT_MAP[confIdx][1]);
+    boolean printed = printTimeDate(lcd, dt, LCD_DT_MAP, LCD_OFFSET);
+    if (printed) {
+        positionCursor();
+    }
 }
 
 void ClockConf::onModeEnter()
 {
+    // Unset edit mode on mode enter
+    editMode    = false;
     isHoodSHown = false;
+
     lcd.clear();
-    lcd.cursor();
 
     darwIcon(lcd, 0, 0, CHAR_ARROW_UP_IDX);
     darwIcon(lcd, 0, 1, CHAR_ARROW_DOWN_IDX);
@@ -42,9 +46,17 @@ void ClockConf::onModeEnter()
 
 void ClockConf::onModeBtnClicked(uint8_t &mode)
 {
-    confIdx++;
+    // Next mode if not editing
+    if (!editMode) {
+        mode++;
+        return;
+    }
 
-    if (confIdx == 6) {
+    confIdx++;
+    // Set cursor to the new position
+    positionCursor();
+
+    if (confIdx == 6) {positionCursor();
         confIdx = 0;
         mode++;
     }
@@ -52,21 +64,39 @@ void ClockConf::onModeBtnClicked(uint8_t &mode)
 
 void ClockConf::onModeBtnHeld(uint8_t &mode)
 {
+    // Do nothing if not editing
+    if (!editMode)
+    {
+        return;
+    }
+
     // Write time from dt to RTC
     toRtc();
 
     confIdx = 0;
-    mode++;
+
+    // Back to clock
+    mode = 0;
 }
 
 void ClockConf::onUpBtnClicked()
 {
+    if (switchedToEdit())
+    {
+        return;
+    }
+
     uint8_t currentValue = dt.byIndex(confIdx);
     dt.setValue(currentValue + 1, confIdx);
 }
 
 void ClockConf::onDownBtnClicked()
 {
+    if (switchedToEdit())
+    {
+        return;
+    }
+
     uint8_t currentValue = dt.byIndex(confIdx);
     dt.setValue(currentValue - 1, confIdx);
 }

@@ -23,7 +23,7 @@ struct DateTimeRtc {
         uint8_t maxDaysInMonth(uint8_t month);
 
     public:
-        DateTimeRtc(uint8_t y, uint8_t m, uint8_t d, uint8_t hr, uint8_t mt, uint8_t sc);
+        DateTimeRtc(uint8_t hr, uint8_t mt, uint8_t sc, uint8_t y, uint8_t m, uint8_t d);
         DateTimeRtc();
 
         void setValue(uint8_t value, uint8_t index);
