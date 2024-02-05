@@ -55,10 +55,11 @@ Timed backlight(6, true);
 // HH-MM-SS DD-MM-YY
 DateTimeRtc initDt(23, 59, 55, 31, 12, 99);
 DateTimeRtc alarmOne(07, 00, 00, 01, 01, 00);
+DateTimeRtc alarmTwo(06, 15, 00, 01, 01, 00);
 DateTimeRtc currentTimeObj;
 
 // Modes definition 
-const uint8_t MODES_COUNT = 3;
+const uint8_t MODES_COUNT = 4;
 ClockMode* modes[MODES_COUNT];
 uint8_t modeIdx = 0;
 
@@ -79,7 +80,8 @@ void setup()
   // Clock Conf will write initial time to RTC in construtor
   modes[0] = new Clock(lcd, currentTimeObj, 500);
   modes[1] = new ClockConf(lcd, initDt, 10);
-  modes[2] = new Alarm(lcd, alarmOne, 10, "A");
+  modes[2] = new Alarm(lcd, alarmOne, 10, 1);
+  modes[3] = new Alarm(lcd, alarmTwo, 10, 2);
 
   // Buttom hand
   modeButton.setClickHandler(onModeBtnClicked);
