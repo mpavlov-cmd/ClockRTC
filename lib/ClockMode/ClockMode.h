@@ -20,7 +20,7 @@ struct ClockMode {
 
         // Common logic 
         boolean shouldRefresh(unsigned long mills);
-        // To be implemeted for specific IC to store time to
+        // TODO: move to ColckConf To be implemeted for specific IC to store time to
         void toRtc();
 
     public:

@@ -44,6 +44,7 @@ void Alarm::onModeEnter()
     editMode = false;
 
     lcd.clear();
+    lcd.noCursor();
     dt.forseMask();
 }
 

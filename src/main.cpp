@@ -152,5 +152,5 @@ void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
 void lightAndBeep()
 {
   buzzer.up(50);
-  backlight.up(2000);
+  backlight.up(10000);
 }
