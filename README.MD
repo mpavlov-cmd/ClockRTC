@@ -5,6 +5,7 @@ Custom LCD Chars: https://maxpromer.github.io/LCD-Character-Creator/
 Low Power: https://www.gammon.com.au/power
 Interrupts: https://www.youtube.com/watch?v=wIcC8-g9Lnw
 Pointers C++: https://www.youtube.com/watch?v=jdQaaFNpM_4
+More on Wath Dog Interrupts: https://forum.arduino.cc/t/watchdog-timer-interrupt-and-external-interrupt/194488
 
 ## TODO List
 - [x] Add limits for time and and dates

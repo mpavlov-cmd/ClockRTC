@@ -3,6 +3,7 @@
 #include <LiquidCrystal_74HC595.h>
 #include <EventButton.h>
 #include <avr/sleep.h>
+#include <avr/wdt.h>
 
 #include <DateTimeRtc.h>
 #include <DS1307M.h>
@@ -79,6 +80,8 @@ unsigned long timeEllapsed = 0;
 volatile boolean nowSleeping = false;
 volatile boolean awaken = false;
 
+volatile boolean enabledByWatchDog = false;
+
 // Init main clock so it can be used
 Clock mainClock(lcd, currentTimeObj, 500);
 
@@ -90,6 +93,13 @@ ISR(PCINT2_vect)
 
     awaken = true;
     nowSleeping = false;
+}
+
+// Watchdog interrupt
+ISR(WDT_vect)
+{
+    // Disable watchdog
+    wdt_disable();
 }
 
 void setup()
@@ -126,6 +136,8 @@ void loop()
     // Check if woke-up
     if (awaken)
     {
+        wdt_disable();
+        
         powerSaveDisplay(false, mills);
         stayAlive(ALIVE_FOR);
         // Drop awaken flag
@@ -146,14 +158,29 @@ void loop()
     {
         nowSleeping = true;
 
+        // TODO: Only run if not sleeping yet
         powerSaveDisplay(true, mills);
         buzzer.mute();
         backlight.mute();
+
+        // ------ Configure watch dog timer
+        Serial.println("Entered WDT Conf");
+        delay(500);
+
+        // ------ WDT Configuration Start ------
+        wdt_reset();
+        MCUSR &= ~_BV(WDRF);
+        /* Start the WDT Config change sequence. */
+        WDTCSR |= _BV(WDCE) | _BV(WDE);
+        /* Configure the prescaler and the WDT for interrupt mode only*/
+        WDTCSR = _BV(WDP0) | _BV(WDP3) | _BV(WDIE);
+        // ------ WDT Configuration End ------
 
         // Configure sleep mode
         sleep_enable();
         set_sleep_mode(SLEEP_MODE_PWR_DOWN);
         
+        // interrupts();
         enablePCI();
         sleep_cpu();
     }
