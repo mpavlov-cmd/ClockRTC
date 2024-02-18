@@ -30,3 +30,8 @@ void TimedPin::up(unsigned int durationMills)
     beepUntil = ellapsed + durationMills;
     actionUp();
 }
+
+void TimedPin::mute()
+{
+    actionDown();
+}

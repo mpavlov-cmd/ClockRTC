@@ -7,8 +7,8 @@
 #include <DateTimeRtc.h>
 
 boolean printTimeDate(LiquidCrystal_74HC595 &lcd, DateTimeRtc &dt, const uint8_t mappings[6][2], uint8_t offset);
-void printClockHud(LiquidCrystal_74HC595 &lcd, boolean &shownHud, uint8_t offset);
+void printClockHud(LiquidCrystal_74HC595 &lcd, uint8_t offsetClock, uint8_t offsetCal, boolean showSeconds);
+void printClockHud(LiquidCrystal_74HC595 &lcd, uint8_t offsetClock, boolean showSeconds);
 void darwIcon(LiquidCrystal_74HC595 &lcd, uint8_t col, uint8_t row, uint8_t iconIdx);
-
 
 #endif

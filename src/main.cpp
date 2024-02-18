@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_74HC595.h>
 #include <EventButton.h>
+#include <avr/sleep.h>
 
 #include <DateTimeRtc.h>
 #include <DS1307M.h>
@@ -17,10 +18,21 @@ void onDownBtnClicked(EventButton &eb);
 void onModeBtnClicked(EventButton &eb);
 void onModeBtnHeld(EventButton &eb);
 void handleModeChange(uint8_t srcMode, uint8_t &modeIdx);
+
 void lightAndBeep();
+void stayAlive(unsigned int leaveFor);
+
+void powerSaveDisplay(boolean enable, unsigned long mills);
+
+// TODO: Move to lib
+void enablePCI();
+void disablePCI();
 
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
+const uint8_t MODES_COUNT = 4;
+
+const unsigned int ALIVE_FOR = 5000;
 
 // Setup LCD with shift register
 /*
@@ -46,9 +58,7 @@ EventButton upButton(2);
 EventButton downBunnon(3);
 EventButton modeButton(4);
 
-// Buzzer PIN5
 Buzzer buzzer(5, true);
-// Backlight PIN6
 Timed backlight(6, true);
 
 // Init Date Time Objects
@@ -58,99 +68,176 @@ DateTimeRtc alarmOne(07, 00, 00, 01, 01, 00);
 DateTimeRtc alarmTwo(06, 15, 00, 01, 01, 00);
 DateTimeRtc currentTimeObj;
 
-// Modes definition 
-const uint8_t MODES_COUNT = 4;
-ClockMode* modes[MODES_COUNT];
+// Modes definition
+ClockMode *modes[MODES_COUNT];
 uint8_t modeIdx = 0;
+
+// Sleep mode timer
+unsigned long powerUpThreshold = ALIVE_FOR;
+unsigned long timeEllapsed = 0;
+
+volatile boolean nowSleeping = false;
+volatile boolean awaken = false;
+
+// Init main clock so it can be used
+Clock mainClock(lcd, currentTimeObj, 500);
+
+// Interrupt handler for port D
+// To check what button was clicked digitalRead(PIN) is LOW;
+ISR(PCINT2_vect)
+{
+    disablePCI();
+
+    awaken = true;
+    nowSleeping = false;
+}
 
 void setup()
 {
-  // TODO: Remove
-  Serial.begin(9600);
+    // TODO: Remove
+    Serial.begin(9600);
 
-  // Wire
-  Wire.begin();
+    // Wire
+    Wire.begin();
+    rtcWrite(REG_CONTROL, RTC_SQWE_1);
 
-  // Set and read control
-  rtcWrite(REG_CONTROL, RTC_SQWE_1);
+    // LCD Init
+    lcd.begin(16, 2);
 
-  // LCD Init
-  lcd.begin(16, 2);
+    // Clock Conf will write initial time to RTC in construtor
+    modes[0] = &mainClock;
+    modes[1] = new ClockConf(lcd, initDt, 10);
+    modes[2] = new Alarm(lcd, alarmOne, 10, 1);
+    modes[3] = new Alarm(lcd, alarmTwo, 10, 2);
 
-  // Clock Conf will write initial time to RTC in construtor
-  modes[0] = new Clock(lcd, currentTimeObj, 500);
-  modes[1] = new ClockConf(lcd, initDt, 10);
-  modes[2] = new Alarm(lcd, alarmOne, 10, 1);
-  modes[3] = new Alarm(lcd, alarmTwo, 10, 2);
-
-  // Buttom hand
-  modeButton.setClickHandler(onModeBtnClicked);
-  modeButton.setLongClickHandler(onModeBtnHeld);
-  upButton.setClickHandler(onUpBtnClicked);
-  downBunnon.setClickHandler(onDownBtnClicked);
+    // Buttom hand
+    modeButton.setClickHandler(onModeBtnClicked);
+    modeButton.setLongClickHandler(onModeBtnHeld);
+    upButton.setClickHandler(onUpBtnClicked);
+    downBunnon.setClickHandler(onDownBtnClicked);
 }
 
 void loop()
 {
-  // Get mills
-  unsigned long currentMillis = millis();
+    // Get mills
+    unsigned long mills = millis();
+    timeEllapsed = mills;
 
-  modeButton.update();
-  upButton.update();
-  downBunnon.update();
+    // Check if woke-up
+    if (awaken)
+    {
+        powerSaveDisplay(false, mills);
+        stayAlive(ALIVE_FOR);
+        // Drop awaken flag
+        awaken = false;
+    }
 
-  buzzer.update(currentMillis);
-  backlight.update(currentMillis);
+    modeButton.update();
+    upButton.update();
+    downBunnon.update();
 
-  modes[modeIdx]->onRefresh(currentMillis);
+    buzzer.update(mills);
+    backlight.update(mills);
+
+    modes[modeIdx]->onRefresh(mills);
+
+    // Sleep
+    if (mills >= powerUpThreshold)
+    {
+        nowSleeping = true;
+
+        powerSaveDisplay(true, mills);
+        buzzer.mute();
+        backlight.mute();
+
+        // Configure sleep mode
+        sleep_enable();
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        
+        enablePCI();
+        sleep_cpu();
+    }
 }
 
 void onUpBtnClicked(EventButton &eb)
 {
-  lightAndBeep();
-  modes[modeIdx]->onUpBtnClicked();
+    stayAlive(ALIVE_FOR);
+    lightAndBeep();
+    modes[modeIdx]->onUpBtnClicked();
 }
 
 void onDownBtnClicked(EventButton &eb)
 {
-  lightAndBeep();
-  modes[modeIdx]->onDownBtnClicked();
+    stayAlive(ALIVE_FOR);
+    lightAndBeep();
+    modes[modeIdx]->onDownBtnClicked();
 }
 
 void onModeBtnClicked(EventButton &eb)
 {
-  lightAndBeep();
-  // Store current mode 
-  uint8_t currentMode = modeIdx;
-  modes[modeIdx]->onModeBtnClicked(modeIdx);
-  handleModeChange(currentMode, modeIdx);
+    stayAlive(ALIVE_FOR);
+    lightAndBeep();
+    // Store current mode
+    uint8_t currentMode = modeIdx;
+    modes[modeIdx]->onModeBtnClicked(modeIdx);
+    handleModeChange(currentMode, modeIdx);
 }
 
 void onModeBtnHeld(EventButton &eb)
 {
-  lightAndBeep();
-  // Store current mode
-  uint8_t currentMode = modeIdx;
-  modes[modeIdx]->onModeBtnHeld(modeIdx);
-  handleModeChange(currentMode, modeIdx);
+    stayAlive(ALIVE_FOR);
+    lightAndBeep();
+    // Store current mode
+    uint8_t currentMode = modeIdx;
+    modes[modeIdx]->onModeBtnHeld(modeIdx);
+    handleModeChange(currentMode, modeIdx);
 }
 
 void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
 {
-  if (srcMode != modeIdx)
-  {
-    // Mode changed, check out of bounds
-    if (modeIdx > MODES_COUNT - 1)
+    if (srcMode != modeIdx)
     {
-      modeIdx = 0;
+        // Mode changed, check out of bounds
+        if (modeIdx > MODES_COUNT - 1)
+        {
+            modeIdx = 0;
+        }
+        // Fire onModeEnter for the next mode
+        modes[modeIdx]->onModeEnter();
     }
-    // Fire onModeEnter for the next mode
-    modes[modeIdx]->onModeEnter();
-  }
 }
 
 void lightAndBeep()
 {
-  buzzer.up(50);
-  backlight.up(10000);
+    buzzer.up(50);
+    backlight.up(10000);
+}
+
+void stayAlive(unsigned int leaveFor)
+{
+    powerUpThreshold = millis() + leaveFor;
+}
+
+void powerSaveDisplay(boolean enable, unsigned long mills)
+{
+    modeIdx = 0;
+    mainClock.setShowSeconds(!enable);
+    mainClock.onModeEnter();
+    mainClock.onRefresh(mills);
+}
+
+void enablePCI()
+{
+    // Configure interrupts
+    // Configure PCI - Pin Change Interrupt for Port D
+    PCICR |= B00000100;
+    // Enable Pins 4,5,6 of ATMEGA - 2,3,4 of arduino for interrupts
+    PCMSK2 |= B00011100;
+}
+
+void disablePCI()
+{
+    // Disable interrupts
+    PCICR = PCICR & ~B00000100;
+    PCMSK2 = PCMSK2 & ~B00011100;
 }

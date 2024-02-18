@@ -8,8 +8,8 @@
 struct ClockConf : public ClockMode {
 
         private:
-            boolean isHoodSHown = false; 
-            boolean editMode    = false;
+            boolean firstRun = true; 
+            boolean editMode = false;
             uint8_t confIdx = 0;
 
             boolean switchedToEdit() {

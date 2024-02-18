@@ -36,24 +36,25 @@ boolean printTimeDate(LiquidCrystal_74HC595 &lcd, DateTimeRtc &dt, const uint8_t
     return printed;
 }
 
-void printClockHud(LiquidCrystal_74HC595 &lcd, boolean &shownHud, uint8_t offset)
+void printClockHud(LiquidCrystal_74HC595 &lcd, uint8_t offsetClock, uint8_t offsetCal, boolean showSeconds)
 {
-    if (shownHud)
-    {
-        return;
+    lcd.setCursor(2 + offsetClock, 0);
+    lcd.print(":");
+
+    if (showSeconds) {
+        lcd.setCursor(5 + offsetClock, 0);
+        lcd.print(":");
     }
 
-    lcd.setCursor(2 + offset, 0);
-    lcd.print(":");
-    lcd.setCursor(5 + offset, 0);
-    lcd.print(":");
-
-    lcd.setCursor(2 + offset, 1);
+    lcd.setCursor(2 + offsetCal, 1);
     lcd.print("-");
-    lcd.setCursor(5 + offset, 1);
+    lcd.setCursor(5 + offsetCal, 1);
     lcd.print("-");
+}
 
-    shownHud = true;
+void printClockHud(LiquidCrystal_74HC595 &lcd, uint8_t offset, boolean showSeconds)
+{
+    printClockHud(lcd, offset, offset, showSeconds);
 }
 
 void darwIcon(LiquidCrystal_74HC595 &lcd, uint8_t col, uint8_t row, uint8_t iconIdx)

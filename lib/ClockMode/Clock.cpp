@@ -7,7 +7,8 @@ Clock::Clock(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned 
 
 void Clock::onRefresh(unsigned long mills)
 {
-     if (!shouldRefresh(mills)) {
+     if (!shouldRefresh(mills) && !firstRun)
+     {
           return;
      }
 
@@ -19,13 +20,32 @@ void Clock::onRefresh(unsigned long mills)
      dt.setValue(rtcReadToInt(REG_MONTH), 4);
      dt.setValue(rtcReadToInt(REG_YEAR), 5);
 
-     printClockHud(lcd, isHoodSHown, LCD_OFFSET);
-     printTimeDate(lcd, dt, LCD_DT_MAP, LCD_OFFSET);
+     if (firstRun)
+     {
+          uint8_t timeOffset = showSeconds ? LCD_OFFSET : LCD_OFFSET + 3;
+          printClockHud(lcd, timeOffset, LCD_OFFSET, showSeconds);
+     }
+
+     // Define the parameter variable
+     const uint8_t(*lcdMap)[2];
+     if (showSeconds)
+     {
+          lcdMap = LCD_DT_MAP;
+     }
+     else
+     {
+          lcdMap = LCD_DT_MAP_NS;
+     }
+
+     printTimeDate(lcd, dt, lcdMap, LCD_OFFSET);
+   
+     // Indicate first run ended 
+     firstRun = false;
 }
 
 void Clock::onModeEnter()
 {
-     isHoodSHown = false;
+     firstRun = true;
      lcd.clear();
      lcd.noCursor();
      dt.forseMask();
@@ -46,4 +66,9 @@ void Clock::onUpBtnClicked()
 
 void Clock::onDownBtnClicked()
 {
+}
+
+void Clock::setShowSeconds(boolean value)
+{
+    showSeconds = value;
 }

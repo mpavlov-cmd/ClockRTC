@@ -23,18 +23,24 @@ void ClockConf::onRefresh(unsigned long mills)
         return;
     }
 
-    printClockHud(lcd, isHoodSHown, LCD_OFFSET);
+    if (firstRun) {
+        printClockHud(lcd, LCD_OFFSET, true);
+    }
+    
     boolean printed = printTimeDate(lcd, dt, LCD_DT_MAP, LCD_OFFSET);
     if (printed) {
         positionCursor();
     }
+
+    // Indicate first run ended 
+    firstRun = false;
 }
 
 void ClockConf::onModeEnter()
 {
     // Unset edit mode on mode enter
     editMode    = false;
-    isHoodSHown = false;
+    firstRun    = true;
 
     lcd.clear();
 

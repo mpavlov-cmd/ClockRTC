@@ -26,6 +26,7 @@ public:
 
     void update(unsigned long mills);
     void up(unsigned int durationMills);
+    void mute();
 };
 
 #endif
