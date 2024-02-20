@@ -8,7 +8,7 @@ ClockMode(liqudCristal, dateTime, refreshInterval)
     this->name = name;
 }
 
-void Alarm::onRefresh(unsigned long mills)
+void Alarm::onRefresh(const unsigned long& mills)
 {
     // Show hood only once
     if (!isHoodSHown) {

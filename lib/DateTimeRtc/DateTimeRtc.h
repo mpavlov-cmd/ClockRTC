@@ -19,6 +19,7 @@ struct DateTimeRtc {
     private:
         uint8_t hours, minutes, seconds, day, month, year;
         uint8_t changeMask = ZERO_MASK;
+        
         uint8_t verify(uint8_t value, uint8_t index);
         uint8_t maxDaysInMonth(uint8_t month);
 

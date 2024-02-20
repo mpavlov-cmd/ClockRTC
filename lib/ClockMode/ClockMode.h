@@ -19,7 +19,7 @@ struct ClockMode {
         unsigned long timeEllapsed = 0;
 
         // Common logic 
-        boolean shouldRefresh(unsigned long mills);
+        boolean shouldRefresh(const unsigned long& mills);
         // TODO: move to ColckConf To be implemeted for specific IC to store time to
         void toRtc();
 
@@ -31,7 +31,7 @@ struct ClockMode {
         // Common constructor 
         ClockMode(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval);
 
-        virtual void onRefresh(unsigned long mills) = 0; // Pure virtual function making ClockMode an abstract class
+        virtual void onRefresh(const unsigned long& mills) = 0; // Pure virtual function making ClockMode an abstract class
         virtual void onModeEnter() = 0;
         virtual void onModeBtnClicked(uint8_t &mode) = 0;
         virtual void onModeBtnHeld(uint8_t &mode) = 0;

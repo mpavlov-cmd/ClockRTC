@@ -5,12 +5,15 @@
 Clock::Clock(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval) 
      : ClockMode(liqudCristal, dateTime, refreshInterval) {}
 
-void Clock::onRefresh(unsigned long mills)
+void Clock::onRefresh(const unsigned long& mills)
 {
-     if (!shouldRefresh(mills) && !firstRun)
+     // Refresh during as time comes or if forse refresh flag is set
+     if (!shouldRefresh(mills) && !firstRun && !forsedRefresh)
      {
           return;
      }
+
+     // Serial.println("Clock Refresh");
 
      // Get time from clock and set to dt object
      dt.setValue(rtcReadToInt(REG_HOUR), 0);
@@ -28,19 +31,13 @@ void Clock::onRefresh(unsigned long mills)
 
      // Define the parameter variable
      const uint8_t(*lcdMap)[2];
-     if (showSeconds)
-     {
-          lcdMap = LCD_DT_MAP;
-     }
-     else
-     {
-          lcdMap = LCD_DT_MAP_NS;
-     }
+     lcdMap = showSeconds ? LCD_DT_MAP : LCD_DT_MAP_NS;
 
      printTimeDate(lcd, dt, lcdMap, LCD_OFFSET);
    
-     // Indicate first run ended 
+     // Indicate first run ended and drop forceRefresh flag
      firstRun = false;
+     forsedRefresh = false;
 }
 
 void Clock::onModeEnter()
@@ -71,4 +68,9 @@ void Clock::onDownBtnClicked()
 void Clock::setShowSeconds(boolean value)
 {
     showSeconds = value;
+}
+
+void Clock::forceNextRefresh()
+{
+     forsedRefresh = true;
 }

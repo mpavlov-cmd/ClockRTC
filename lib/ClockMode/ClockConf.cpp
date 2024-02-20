@@ -15,7 +15,7 @@ ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime,
     toRtc();
 }
 
-void ClockConf::onRefresh(unsigned long mills)
+void ClockConf::onRefresh(const unsigned long& mills)
 {
     // Do noting if time not ellapsed
     if (!shouldRefresh(mills))

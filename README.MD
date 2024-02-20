@@ -14,7 +14,7 @@ More on Wath Dog Interrupts: https://forum.arduino.cc/t/watchdog-timer-interrupt
 - [x] Play sound when button is clicked
 - [x] Add alarm feature
 - [x] Implement showing time without seconds
-- [ ] Go to sleep mode after X minutes of inactivity. In sleep mode time is refreshed based on the watch-dog interrupt, time shown without seconds. Any button click would run interrupt to exit sleep mode, and set sleep mode timer to 0;
+- [x] Go to sleep mode after X minutes of inactivity. In sleep mode time is refreshed based on the watch-dog interrupt, time shown without seconds. Any button click would run interrupt to exit sleep mode, and set sleep mode timer to 0;
 - [ ] Add HUD in 2 modes
 - [ ] Actually fire alarm with beeper
 - [ ] Display day of week

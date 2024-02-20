@@ -20,37 +20,34 @@ void onModeBtnClicked(EventButton &eb);
 void onModeBtnHeld(EventButton &eb);
 void handleModeChange(uint8_t srcMode, uint8_t &modeIdx);
 
-void lightAndBeep();
-void stayAlive(unsigned int leaveFor);
-
-void powerSaveDisplay(boolean enable, unsigned long mills);
+void goToSleep(const unsigned long& mills);
+void wakeUp(const unsigned long& mills); 
+void stayAwake(const unsigned int& leaveFor);
+void powerSaveDisplay(boolean enable, const unsigned long& mills);
 
 // TODO: Move to lib
 void enablePCI();
 void disablePCI();
 
+void lightAndBeep();
+
 // Constat declarations
 const uint8_t RTC_SQWE_1 = 0b00010000;
 const uint8_t MODES_COUNT = 4;
 
-const unsigned int ALIVE_FOR = 5000;
+const unsigned int ALIVE_FOR = 15000;
 
-// Setup LCD with shift register
 /*
-SR -> ATMEGA
+Setup LCD with shift register
+SR to ATMEGA
 ----------
 DS    -> IO-11
 SH_CP -> IO-12
 ST_CP -> IO-10
 
-SR -> LCD
+SR to LCD
 ----------
-RS -> 1
-E  -> 3
-D4 -> 4
-D5 -> 5
-D6 -> 6
-D7 -> 7
+RS -> 1, E  -> 3, D4 -> 4, D5 -> 5, D6 -> 6, D7 -> 7
 */
 LiquidCrystal_74HC595 lcd(11, 12, 10, 1, 3, 4, 5, 6, 7);
 
@@ -120,7 +117,7 @@ void setup()
     modes[2] = new Alarm(lcd, alarmOne, 10, 1);
     modes[3] = new Alarm(lcd, alarmTwo, 10, 2);
 
-    // Buttom hand
+    // Button handlers
     modeButton.setClickHandler(onModeBtnClicked);
     modeButton.setLongClickHandler(onModeBtnHeld);
     upButton.setClickHandler(onUpBtnClicked);
@@ -133,16 +130,8 @@ void loop()
     unsigned long mills = millis();
     timeEllapsed = mills;
 
-    // Check if woke-up
-    if (awaken)
-    {
-        wdt_disable();
-        
-        powerSaveDisplay(false, mills);
-        stayAlive(ALIVE_FOR);
-        // Drop awaken flag
-        awaken = false;
-    }
+    // Check just if woke up
+    wakeUp(mills);
 
     modeButton.update();
     upButton.update();
@@ -153,56 +142,26 @@ void loop()
 
     modes[modeIdx]->onRefresh(mills);
 
-    // Sleep
-    if (mills >= powerUpThreshold)
-    {
-        nowSleeping = true;
-
-        // TODO: Only run if not sleeping yet
-        powerSaveDisplay(true, mills);
-        buzzer.mute();
-        backlight.mute();
-
-        // ------ Configure watch dog timer
-        Serial.println("Entered WDT Conf");
-        delay(500);
-
-        // ------ WDT Configuration Start ------
-        wdt_reset();
-        MCUSR &= ~_BV(WDRF);
-        /* Start the WDT Config change sequence. */
-        WDTCSR |= _BV(WDCE) | _BV(WDE);
-        /* Configure the prescaler and the WDT for interrupt mode only*/
-        WDTCSR = _BV(WDP0) | _BV(WDP3) | _BV(WDIE);
-        // ------ WDT Configuration End ------
-
-        // Configure sleep mode
-        sleep_enable();
-        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        
-        // interrupts();
-        enablePCI();
-        sleep_cpu();
-    }
+    goToSleep(mills);
 }
 
 void onUpBtnClicked(EventButton &eb)
 {
-    stayAlive(ALIVE_FOR);
+    stayAwake(ALIVE_FOR);
     lightAndBeep();
     modes[modeIdx]->onUpBtnClicked();
 }
 
 void onDownBtnClicked(EventButton &eb)
 {
-    stayAlive(ALIVE_FOR);
+    stayAwake(ALIVE_FOR);
     lightAndBeep();
     modes[modeIdx]->onDownBtnClicked();
 }
 
 void onModeBtnClicked(EventButton &eb)
 {
-    stayAlive(ALIVE_FOR);
+    stayAwake(ALIVE_FOR);
     lightAndBeep();
     // Store current mode
     uint8_t currentMode = modeIdx;
@@ -212,7 +171,7 @@ void onModeBtnClicked(EventButton &eb)
 
 void onModeBtnHeld(EventButton &eb)
 {
-    stayAlive(ALIVE_FOR);
+    stayAwake(ALIVE_FOR);
     lightAndBeep();
     // Store current mode
     uint8_t currentMode = modeIdx;
@@ -234,18 +193,67 @@ void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
     }
 }
 
-void lightAndBeep()
+void goToSleep(const unsigned long& mills)
 {
-    buzzer.up(50);
-    backlight.up(10000);
+
+    if (mills < powerUpThreshold)
+    {
+        return;
+    }
+
+    if (!nowSleeping)
+    {
+        powerSaveDisplay(true, mills);
+        buzzer.mute();
+        backlight.mute();
+
+        nowSleeping = true;
+    }
+
+    // Force refresh clock on the next wakeup
+    mainClock.forceNextRefresh();
+
+    // ------ WDT Configuration Start ------
+    // Feed the dog
+    wdt_reset();
+
+    MCUSR &= ~_BV(WDRF);
+    // Start the WDT Config change sequence.
+    WDTCSR |= _BV(WDCE) | _BV(WDE);
+    // Configure the prescaler and the WDT for interrupt mode only 
+    WDTCSR = _BV(WDP0) | _BV(WDP3) | _BV(WDIE);
+    // ------ WDT Configuration End ------
+
+    // Configure sleep mode
+    sleep_enable();
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    
+    enablePCI();
+    sleep_cpu();
 }
 
-void stayAlive(unsigned int leaveFor)
+void wakeUp(const unsigned long& mills)
+{
+    if (!awaken)
+    {
+        return;
+    }
+
+    wdt_disable();
+    
+    powerSaveDisplay(false, mills);
+    stayAwake(ALIVE_FOR);
+
+    // Drop awaken flag
+    awaken = false;
+}
+
+void stayAwake(const unsigned int& leaveFor)
 {
     powerUpThreshold = millis() + leaveFor;
 }
 
-void powerSaveDisplay(boolean enable, unsigned long mills)
+void powerSaveDisplay(boolean enable, const unsigned long& mills)
 {
     modeIdx = 0;
     mainClock.setShowSeconds(!enable);
@@ -267,4 +275,10 @@ void disablePCI()
     // Disable interrupts
     PCICR = PCICR & ~B00000100;
     PCMSK2 = PCMSK2 & ~B00011100;
+}
+
+void lightAndBeep()
+{
+    buzzer.up(50);
+    backlight.up(10000);
 }

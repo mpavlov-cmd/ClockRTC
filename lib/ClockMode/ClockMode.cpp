@@ -8,7 +8,7 @@ ClockMode::ClockMode(
 {
 }
 
-boolean ClockMode::shouldRefresh(unsigned long mills)
+boolean ClockMode::shouldRefresh(const unsigned long& mills)
 {
     boolean result = mills - timeEllapsed >= refInt;
     if (result) {
