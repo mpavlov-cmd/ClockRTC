@@ -1,3 +1,4 @@
+
 #include "ClockConf.h"
 #include <LcdUtils.h>
 #include <DS1307M.h>
@@ -5,14 +6,16 @@
 
 ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
     : ClockMode(liqudCristal, dateTime, refreshInterval)
-{
-    // TODO: Needed in different modes, move to common code
-    // Setup custom chars
-    lcd.createChar(CHAR_ARROW_UP_IDX, CHAR_ARROW_UP);
-    lcd.createChar(CHAR_ARROW_DOWN_IDX, CHAR_ARROW_DOWN);
+{}
 
-    // Write initial time to the IC
-    toRtc();
+void ClockConf::toRtc()
+{
+    rtcWrite(REG_HOUR, intToBcd(dt.byIndex(0)));
+    rtcWrite(REG_MIN, intToBcd(dt.byIndex(1)));
+    rtcWrite(REG_SEC, intToBcd(dt.byIndex(2)));
+    rtcWrite(REG_DAY, intToBcd(dt.byIndex(3)));
+    rtcWrite(REG_MONTH, intToBcd(dt.byIndex(4)));
+    rtcWrite(REG_YEAR, intToBcd(dt.byIndex(5)));
 }
 
 void ClockConf::onRefresh(const unsigned long& mills)

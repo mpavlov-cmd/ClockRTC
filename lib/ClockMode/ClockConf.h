@@ -37,6 +37,8 @@ struct ClockConf : public ClockMode {
             void onModeBtnHeld(uint8_t &mode) override;
             void onUpBtnClicked() override;
             void onDownBtnClicked() override;
+
+            void toRtc();
 };
 
 #endif

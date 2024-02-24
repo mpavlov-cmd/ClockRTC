@@ -12,6 +12,7 @@
 #include <Alarm.h>
 #include <Buzzer.h>
 #include <Timed.h>
+#include <LcdUtils.h>
 
 // Function declarations
 void onUpBtnClicked(EventButton &eb);
@@ -20,6 +21,7 @@ void onModeBtnClicked(EventButton &eb);
 void onModeBtnHeld(EventButton &eb);
 void handleModeChange(uint8_t srcMode, uint8_t &modeIdx);
 
+void initTime();
 void goToSleep(const unsigned long& mills);
 void wakeUp(const unsigned long& mills); 
 void stayAwake(const unsigned int& leaveFor);
@@ -81,6 +83,7 @@ volatile boolean enabledByWatchDog = false;
 
 // Init main clock so it can be used
 Clock mainClock(lcd, currentTimeObj, 500);
+ClockConf clockConf(lcd, initDt, 10);
 
 // Interrupt handler for port D
 // To check what button was clicked digitalRead(PIN) is LOW;
@@ -101,19 +104,22 @@ ISR(WDT_vect)
 
 void setup()
 {
+    // Turn off ADC (Analog to digital converter)
+    ADCSRA = 0;
+
     // TODO: Remove
     Serial.begin(9600);
 
     // Wire
     Wire.begin();
-    rtcWrite(REG_CONTROL, RTC_SQWE_1);
+    initTime();
 
     // LCD Init
-    lcd.begin(16, 2);
+    setUpLcd(lcd, 16, 2);
 
     // Clock Conf will write initial time to RTC in construtor
     modes[0] = &mainClock;
-    modes[1] = new ClockConf(lcd, initDt, 10);
+    modes[1] = &clockConf;
     modes[2] = new Alarm(lcd, alarmOne, 10, 1);
     modes[3] = new Alarm(lcd, alarmTwo, 10, 2);
 
@@ -193,7 +199,17 @@ void handleModeChange(uint8_t srcMode, uint8_t &modeIdx)
     }
 }
 
-void goToSleep(const unsigned long& mills)
+void initTime()
+{
+    if (rtcRead(REG_CONTROL) == RTC_SQWE_1) {
+        return;
+    }
+
+    rtcWrite(REG_CONTROL, RTC_SQWE_1);
+    clockConf.toRtc();
+}
+
+void goToSleep(const unsigned long &mills)
 {
 
     if (mills < powerUpThreshold)

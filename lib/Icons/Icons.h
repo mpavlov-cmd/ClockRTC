@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 const uint8_t CHAR_ARROW_UP_IDX = 0;
-uint8_t CHAR_ARROW_UP[8] = {
+const uint8_t CHAR_ARROW_UP[8] = {
     B00000,
     B00000,
     B00000,
@@ -17,7 +17,7 @@ uint8_t CHAR_ARROW_UP[8] = {
     B00000};
 
 const uint8_t CHAR_ARROW_DOWN_IDX = 1;
-uint8_t CHAR_ARROW_DOWN[8] = {
+const uint8_t CHAR_ARROW_DOWN[8] = {
     B00000,
     B11111,
     B01110,
