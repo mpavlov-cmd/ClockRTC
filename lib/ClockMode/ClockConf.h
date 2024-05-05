@@ -29,7 +29,7 @@ struct ClockConf : public ClockMode {
             }
 
         public:
-            ClockConf(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
+            ClockConf(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
 
             void onRefresh(const unsigned long& mills) override;
             void onModeEnter() override;

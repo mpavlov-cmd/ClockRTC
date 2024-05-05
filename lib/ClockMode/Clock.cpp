@@ -2,7 +2,7 @@
 #include <LcdUtils.h>
 #include <DS1307M.h>
 
-Clock::Clock(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval) 
+Clock::Clock(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval) 
      : ClockMode(liqudCristal, dateTime, refreshInterval) {}
 
 void Clock::onRefresh(const unsigned long& mills)

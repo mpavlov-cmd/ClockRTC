@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <LiquidCrystal_74HC595.h>
+#include <LiquidCrystal_I2C.h>
 #include <EventButton.h>
 #include <avr/sleep.h>
 #include <avr/wdt.h>
@@ -40,18 +40,11 @@ const uint8_t MODES_COUNT = 4;
 const unsigned int ALIVE_FOR = 15000;
 
 /*
-Setup LCD with shift register
-SR to ATMEGA
-----------
-DS    -> IO-11
-SH_CP -> IO-12
-ST_CP -> IO-10
-
-SR to LCD
-----------
-RS -> 1, E  -> 3, D4 -> 4, D5 -> 5, D6 -> 6, D7 -> 7
+    Set Up LCD with PCF8574
+    Change the I2C address based on the actual value of the display
+    Address is configurable based on 1, 2, 3 pins of the PCF8574
 */
-LiquidCrystal_74HC595 lcd(11, 12, 10, 1, 3, 4, 5, 6, 7);
+LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
 // Buttons
 EventButton upButton(2);

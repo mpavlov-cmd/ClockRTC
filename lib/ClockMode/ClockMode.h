@@ -4,14 +4,14 @@
 #pragma once
 
 #include <Arduino.h>
-#include <LiquidCrystal_74HC595.h>
+#include <LiquidCrystal_I2C.h>
 #include <DateTimeRtc.h>
 
 
 struct ClockMode {
 
     protected:
-        LiquidCrystal_74HC595 &lcd;
+        LiquidCrystal_I2C &lcd;
         DateTimeRtc &dt;
         
         // Variables for render timeouts
@@ -27,7 +27,7 @@ struct ClockMode {
         const uint8_t LCD_DT_MAP[6][2] = {{0, 0}, {3, 0}, {6, 0}, {0, 1}, {3, 1}, {6, 1}};
 
         // Common constructor 
-        ClockMode(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval);
+        ClockMode(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval);
 
         virtual void onRefresh(const unsigned long& mills) = 0; // Pure virtual function making ClockMode an abstract class
         virtual void onModeEnter() = 0;

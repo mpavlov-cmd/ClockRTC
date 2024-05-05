@@ -4,7 +4,7 @@
 #include <DS1307M.h>
 #include <Icons.h>
 
-ClockConf::ClockConf(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
+ClockConf::ClockConf(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
     : ClockMode(liqudCristal, dateTime, refreshInterval)
 {}
 

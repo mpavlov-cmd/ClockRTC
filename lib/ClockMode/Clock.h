@@ -16,7 +16,7 @@ struct Clock : public ClockMode {
             boolean forsedRefresh = false;
 
         public:
-            Clock(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
+            Clock(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
 
             void onRefresh(const unsigned long& mills) override;
             void onModeEnter() override;

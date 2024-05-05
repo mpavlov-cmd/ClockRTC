@@ -39,7 +39,7 @@ struct Alarm : public ClockMode {
         public:
             const uint8_t LCD_TIME_MAP[6][2] = {{0, 1}, {3, 1}, {6, 1}, {UINT8_MAX, 0}, {UINT8_MAX, 0}, {UINT8_MAX, 0}};
 
-            Alarm(LiquidCrystal_74HC595 &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval,uint8_t name); 
+            Alarm(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval,uint8_t name); 
 
             void onRefresh(const unsigned long& mills) override;
             void onModeEnter() override;

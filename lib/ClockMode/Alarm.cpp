@@ -2,7 +2,7 @@
 #include <LcdUtils.h>
 
 
-Alarm::Alarm(LiquidCrystal_74HC595 &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval, uint8_t name) : 
+Alarm::Alarm(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval, uint8_t name) : 
 ClockMode(liqudCristal, dateTime, refreshInterval)
 {
     this->name = name;
