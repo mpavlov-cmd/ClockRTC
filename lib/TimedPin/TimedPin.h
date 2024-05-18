@@ -20,7 +20,8 @@ protected:
     virtual void actionDown() = 0;
 
 public:
-    // const unsigned int NOTE_B7 = 3951;
+    const uint8_t NOOP_PIN = 255;
+
     TimedPin(const uint8_t &buzzerPin, boolean isEnabled);
     void enanled(boolean enanled);
 

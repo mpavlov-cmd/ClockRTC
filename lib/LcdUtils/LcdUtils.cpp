@@ -2,9 +2,17 @@
 
 void setUpLcd(LiquidCrystal_I2C &lcd, uint8_t cols, uint8_t rows)
 {
+    // Power UP LCD
+    digitalWrite(PIN_PB4, HIGH);
+
+    // Init LCD
     lcd.begin(cols, rows);
+
     lcd.createChar(CHAR_ARROW_UP_IDX, const_cast<uint8_t*>(CHAR_ARROW_UP));
     lcd.createChar(CHAR_ARROW_DOWN_IDX, const_cast<uint8_t*>(CHAR_ARROW_DOWN));
+
+    // Enable BL after INIT
+    lcd.backlight();
 }
 
 boolean printTimeDate(LiquidCrystal_I2C &lcd, DateTimeRtc &dt, const uint8_t mappings[6][2], uint8_t offset)

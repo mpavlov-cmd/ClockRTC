@@ -2,7 +2,10 @@
 
 TimedPin::TimedPin(const uint8_t &buzzerPin, boolean isEnabled) : pin(buzzerPin), isEnabled(isEnabled)
 {
-    pinMode(pin, OUTPUT);
+    if (pin != NOOP_PIN)
+    {
+        pinMode(pin, OUTPUT);
+    }
 }
 
 void TimedPin::update(unsigned long mills)

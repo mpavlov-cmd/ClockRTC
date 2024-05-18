@@ -4,9 +4,12 @@ Arduino On Breadboard: https://electronoobs.com/eng_arduino_tut33.php
 Custom LCD Chars: https://maxpromer.github.io/LCD-Character-Creator/
 Low Power: https://www.gammon.com.au/power
 Interrupts: https://www.youtube.com/watch?v=wIcC8-g9Lnw
+More Interruupts: https://dronebotworkshop.com/interrupts/
 Pointers C++: https://www.youtube.com/watch?v=jdQaaFNpM_4
 More on Wath Dog Interrupts: https://forum.arduino.cc/t/watchdog-timer-interrupt-and-external-interrupt/194488
 Cheap PCB Assebmly: https://jlcpcb.com/
+
+Motion Sensor: SR602 
 
 ## TODO List
 - [x] Add limits for time and and dates

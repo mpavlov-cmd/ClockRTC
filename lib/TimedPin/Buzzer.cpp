@@ -8,10 +8,16 @@ Buzzer::Buzzer(const uint8_t &buzzerPin, boolean isEnabled) : TimedPin(buzzerPin
 void Buzzer::actionUp()
 {
     const unsigned int NOTE_B7 = 3951;
-    tone(pin, NOTE_B7);
+    // For Active Buzzer
+    // tone(pin, NOTE_B7);
+
+    digitalWrite(pin, HIGH);
 }
 
 void Buzzer::actionDown()
 {
-    noTone(pin);
+    // For Active Buzzer
+    // noTone(pin);
+
+    digitalWrite(pin, LOW);
 }
