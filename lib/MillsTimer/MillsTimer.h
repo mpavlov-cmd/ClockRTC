@@ -1,33 +1,32 @@
-#ifndef TIMEDPIN_H
-#define TIMEDPIN_H
+#ifndef MILLSTIMER_H
+#define MILLSTIMER_H
 
 #pragma once
 
 #include <Arduino.h>
 
-struct TimedPin
+struct MillsTimer
 {
 
 protected:
-    const uint8_t pin;
     boolean isEnabled = false;
 
     // Timing control
     unsigned long ellapsed = 0;
-    unsigned long beepUntil = 0;
+    unsigned long upUntil = 0;
 
     virtual void actionUp() = 0;
     virtual void actionDown() = 0;
 
 public:
-    const uint8_t NOOP_PIN = 255;
 
-    TimedPin(const uint8_t &buzzerPin, boolean isEnabled);
+    MillsTimer(boolean isEnabled);
     void enanled(boolean enanled);
 
     void update(unsigned long mills);
     void up(unsigned int durationMills);
     void mute();
+    void onceWithDelay(unsigned int durationMills);
 };
 
 #endif

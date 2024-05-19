@@ -11,9 +11,8 @@
 #include <Clock.h>
 #include <ClockConf.h>
 #include <Alarm.h>
-#include <Buzzer.h>
-#include <Timed.h>
-#include <TimedPin.h>
+#include <BuzzerMillsTimer.h>
+#include <LcdMillsTimer.h>
 #include <LcdUtils.h>
 
 // Function declarations
@@ -56,8 +55,8 @@ LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POS
 EventButton modeButton(PIN_PB1);
 RotaryEncoder encoder(PIN_PB2, PIN_PB3, RotaryEncoder::LatchMode::FOUR3);
 
-Buzzer buzzer(PIN_PB0, true);
-Timed backlight(backlight.NOOP_PIN, lcd, true);
+BuzzerMillsTimer buzzer(PIN_PB0, true);
+LcdMillsTimer backlight(lcd, true);
 
 // Init Date Time Objects
 // HH-MM-SS DD-MM-YY
@@ -125,10 +124,7 @@ void setup()
     modeButton.setLongClickHandler(onModeBtnHeld);
 
     // Hello on Startup
-    // TODO: Fix
-    digitalWrite(PIN_PB0, HIGH);
-    delay(50);
-    digitalWrite(PIN_PB0, LOW);
+    buzzer.onceWithDelay(50);
 }
 
 void loop()
