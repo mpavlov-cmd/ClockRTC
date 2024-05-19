@@ -11,12 +11,11 @@ struct Clock : public ClockMode {
 
             const uint8_t LCD_DT_MAP_NS[6][2] = {{3, 0}, {6, 0}, {UINT8_MAX, 0}, {0, 1}, {3, 1}, {6, 1}};
 
-            boolean firstRun = true;
             boolean showSeconds = true;
             boolean forsedRefresh = false;
 
         public:
-            Clock(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
+            Clock(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval); 
 
             void onRefresh(const unsigned long& mills) override;
             void onModeEnter() override;

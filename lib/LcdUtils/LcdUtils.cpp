@@ -77,3 +77,9 @@ void darwIcon(LiquidCrystal_I2C &lcd, uint8_t col, uint8_t row, uint8_t iconIdx)
     lcd.setCursor(col, row);
     lcd.write(iconIdx);
 }
+
+void drawArrowIcons(LiquidCrystal_I2C &lcd)
+{
+    darwIcon(lcd, 0, 0, CHAR_ARROW_UP_IDX);
+    darwIcon(lcd, 0, 1, CHAR_ARROW_DOWN_IDX);
+}

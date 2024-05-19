@@ -17,6 +17,8 @@ struct ClockMode {
         // Variables for render timeouts
         unsigned int refInt;
         unsigned long timeEllapsed = 0;
+        boolean firstRun = true;
+
 
         // Common logic 
         boolean shouldRefresh(const unsigned long& mills);

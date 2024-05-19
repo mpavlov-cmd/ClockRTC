@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <EventButton.h>
-#include <RotaryEncoder.h>
 #include <avr/sleep.h>
 #include <avr/wdt.h>
 
@@ -14,6 +13,7 @@
 #include <BuzzerMillsTimer.h>
 #include <LcdMillsTimer.h>
 #include <LcdUtils.h>
+#include <EncoderHandler.h>
 
 // Function declarations
 void onUpBtnClicked();
@@ -142,30 +142,7 @@ void loop()
     buzzer.update(mills);
     backlight.update(mills);
 
-    // Encoder code
-	static int pos = 0;
-	encoder.tick();
-
-	int newPos = encoder.getPosition();
-	int dir = (int)(encoder.getDirection());
-	if (pos != newPos)
-	{
-
-		if (newPos > 99 || newPos < -99)
-		{
-			encoder.setPosition(0);
-		}
-
-        if (newPos > pos && dir > 0) {
-            onUpBtnClicked();
-        } 
-
-        if (newPos < pos && dir < 0) {
-            onDownBtnClicked();
-        }
-
-		pos = newPos;
-	}
+    handleEncoderInput(encoder, onUpBtnClicked, onDownBtnClicked);
 
     if (!nowSleeping) {
         modes[modeIdx]->onRefresh(mills);
@@ -190,6 +167,7 @@ void onModeBtnClicked(EventButton &eb)
 {
     stayAwake(ALIVE_FOR);
     lightAndBeep();
+
     // Store current mode
     uint8_t currentMode = modeIdx;
     modes[modeIdx]->onModeBtnClicked(modeIdx);
@@ -200,6 +178,7 @@ void onModeBtnHeld(EventButton &eb)
 {
     stayAwake(ALIVE_FOR);
     lightAndBeep();
+
     // Store current mode
     uint8_t currentMode = modeIdx;
     modes[modeIdx]->onModeBtnHeld(modeIdx);

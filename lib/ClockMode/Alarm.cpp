@@ -1,5 +1,6 @@
-#include "Alarm.h"
+#include <Alarm.h>
 #include <LcdUtils.h>
+#include <Icons.h>
 
 
 Alarm::Alarm(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval, uint8_t name) : 
@@ -11,23 +12,9 @@ ClockMode(liqudCristal, dateTime, refreshInterval)
 void Alarm::onRefresh(const unsigned long& mills)
 {
     // Show hood only once
-    if (!isHoodSHown) {
-
+    if (firstRun) {
         // Alarm HUD
-        lcd.setCursor(LCD_OFFSET, 0);
-        lcd.print("ALARM");
-        lcd.print(name);
-        lcd.print(":");
-        lcd.setCursor(CURSOR_ON_OFF[0], CURSOR_ON_OFF[1]);
-        lcd.print(enabled ? "Y" : "N");
-
-        // TODO: Add column betwwen hours-minutes, minutes-seconds
-
-        // TODO: Fix duplicate code, fix imports
-        darwIcon(lcd, 0, 0, 0);
-        darwIcon(lcd, 0, 1, 1);
-
-        isHoodSHown = true;
+        drawAlarmHood();
     }
 
     boolean printed = printTimeDate(lcd, dt, LCD_TIME_MAP, LCD_OFFSET);
@@ -35,16 +22,19 @@ void Alarm::onRefresh(const unsigned long& mills)
         positionCursor();
     }
 
-    // TODO: Ring the bell
+    // Indicate first run is over
+    firstRun = false;
 }
 
 void Alarm::onModeEnter()
 {
-    isHoodSHown = false;
+    firstRun = true;
     editMode = false;
 
     lcd.clear();
     lcd.noCursor();
+    drawArrowIcons(lcd);
+
     dt.forseMask();
 }
 
@@ -71,10 +61,7 @@ void Alarm::onModeBtnHeld(uint8_t &mode)
     confIdx  = 0;
 
     lcd.noCursor();
-
-    // TODO: duplicate code
-    lcd.setCursor(CURSOR_ON_OFF[0], CURSOR_ON_OFF[1]);
-    lcd.print(enabled ? "Y" : "N");
+    drawEnabledFlag();
 }
 
 // TODO: duplicated code 

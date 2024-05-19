@@ -12,5 +12,6 @@ boolean printTimeDate(LiquidCrystal_I2C& lcd, DateTimeRtc& dt, const uint8_t map
 void printClockHud(LiquidCrystal_I2C& lcd, uint8_t offsetClock, uint8_t offsetCal, boolean showSeconds);
 void printClockHud(LiquidCrystal_I2C& lcd, uint8_t offsetClock, boolean showSeconds);
 void darwIcon(LiquidCrystal_I2C& lcd, uint8_t col, uint8_t row, uint8_t iconIdx);
+void drawArrowIcons(LiquidCrystal_I2C& lcd);
 
 #endif

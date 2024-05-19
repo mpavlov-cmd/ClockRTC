@@ -8,7 +8,6 @@
 struct ClockConf : public ClockMode {
 
         private:
-            boolean firstRun = true; 
             boolean editMode = false;
             uint8_t confIdx = 0;
 

@@ -42,13 +42,11 @@ void ClockConf::onRefresh(const unsigned long& mills)
 void ClockConf::onModeEnter()
 {
     // Unset edit mode on mode enter
-    editMode    = false;
-    firstRun    = true;
+    editMode = false;
+    firstRun = true;
 
     lcd.clear();
-
-    darwIcon(lcd, 0, 0, CHAR_ARROW_UP_IDX);
-    darwIcon(lcd, 0, 1, CHAR_ARROW_DOWN_IDX);
+    drawArrowIcons(lcd);
 
     dt.forseMask();
 }
