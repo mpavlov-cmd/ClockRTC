@@ -2,23 +2,23 @@
 #include <LcdUtils.h>
 #include <Icons.h>
 
-
-Alarm::Alarm(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval, uint8_t name) : 
-ClockMode(liqudCristal, dateTime, refreshInterval)
+Alarm::Alarm(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval, uint8_t name) : EditableClockMode(liqudCristal, dateTime, refreshInterval)
 {
     this->name = name;
 }
 
-void Alarm::onRefresh(const unsigned long& mills)
+void Alarm::onRefresh(const unsigned long &mills)
 {
     // Show hood only once
-    if (firstRun) {
+    if (firstRun)
+    {
         // Alarm HUD
         drawAlarmHood();
     }
 
     boolean printed = printTimeDate(lcd, dt, LCD_TIME_MAP, LCD_OFFSET);
-    if (printed) {
+    if (printed)
+    {
         positionCursor();
     }
 
@@ -40,7 +40,8 @@ void Alarm::onModeEnter()
 
 void Alarm::onModeBtnClicked(uint8_t &mode)
 {
-    if (!editMode) {
+    if (!editMode)
+    {
         mode++;
         return;
     }
@@ -48,7 +49,8 @@ void Alarm::onModeBtnClicked(uint8_t &mode)
     confIdx++;
     positionCursor();
 
-    if (confIdx == 3) {
+    if (confIdx == 3)
+    {
         confIdx = 0;
         mode++;
     }
@@ -56,34 +58,25 @@ void Alarm::onModeBtnClicked(uint8_t &mode)
 
 void Alarm::onModeBtnHeld(uint8_t &mode)
 {
-    enabled  = !enabled;
+    enabled = !enabled;
     editMode = false;
-    confIdx  = 0;
+    confIdx = 0;
 
     lcd.noCursor();
     drawEnabledFlag();
 }
 
-// TODO: duplicated code 
 void Alarm::onUpBtnClicked()
 {
-    if (switchedToEdit())
-    {
-        return;
-    }
-
-    uint8_t currentValue = dt.byIndex(confIdx);
-    dt.setValue(currentValue + 1, confIdx);
+    defaultUpDownButtonHandler(1);
 }
 
-// TODO: duplicated code
 void Alarm::onDownBtnClicked()
 {
-    if (switchedToEdit())
-    {
-        return;
-    }
+    defaultUpDownButtonHandler(-1);
+}
 
-    uint8_t currentValue = dt.byIndex(confIdx);
-    dt.setValue(currentValue - 1, confIdx);
+void Alarm::positionCursor()
+{
+    lcd.setCursor(LCD_TIME_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_TIME_MAP[confIdx][1]);
 }

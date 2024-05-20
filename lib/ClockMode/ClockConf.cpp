@@ -4,8 +4,9 @@
 #include <DS1307M.h>
 #include <Icons.h>
 
+
 ClockConf::ClockConf(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
-    : ClockMode(liqudCristal, dateTime, refreshInterval)
+    : EditableClockMode(liqudCristal, dateTime, refreshInterval)
 {}
 
 void ClockConf::toRtc()
@@ -88,22 +89,15 @@ void ClockConf::onModeBtnHeld(uint8_t &mode)
 
 void ClockConf::onUpBtnClicked()
 {
-    if (switchedToEdit())
-    {
-        return;
-    }
-
-    uint8_t currentValue = dt.byIndex(confIdx);
-    dt.setValue(currentValue + 1, confIdx);
+    defaultUpDownButtonHandler(1);
 }
 
 void ClockConf::onDownBtnClicked()
 {
-    if (switchedToEdit())
-    {
-        return;
-    }
+    defaultUpDownButtonHandler(-1);
+}
 
-    uint8_t currentValue = dt.byIndex(confIdx);
-    dt.setValue(currentValue - 1, confIdx);
+void ClockConf::positionCursor()
+{
+    lcd.setCursor(LCD_DT_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_DT_MAP[confIdx][1]);        
 }

@@ -21,8 +21,9 @@ Motion Sensor: SR602
 - [x] Go to sleep mode after X minutes of inactivity. In sleep mode time is refreshed based on the watch-dog interrupt, time shown without seconds. Any button click would run interrupt to exit sleep mode, and set sleep mode timer to 0; 
 - [x] Disable ADC
 - [x] Configure clock only once to run from battery and maintain configuration
-- [ ] Actually fire alarm with beeper
-- [ ] Add HUD in 2 modes
+- [x] Add HUD in 2 modes
+- [ ] Refactor and rename clock modes, so there is a dedicated parent class for editable mode
+- [ ] Actually fire alarm with beeper, in case interrupted - turn off
 - [ ] Display day of week
 
 Optionally: 

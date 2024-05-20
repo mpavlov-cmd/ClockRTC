@@ -3,17 +3,15 @@
 
 #pragma once
 
-#include <ClockMode.h>
+#include <EditableClockMode.h>
 
-struct Alarm : public ClockMode
+struct Alarm : public EditableClockMode
 {
 
 private:
     const uint8_t CURSOR_ON_OFF[2] = {11, 0};
 
     boolean enabled = false;
-    boolean editMode = false;
-    uint8_t confIdx = 0;
     uint8_t name;
 
     void drawEnabledFlag()
@@ -38,25 +36,8 @@ private:
         drawEnabledFlag();
     }
 
-    // TODO: Remove duplicate code
-    boolean switchedToEdit()
-    {
-        if (editMode)
-        {
-            return false;
-        }
-
-        positionCursor();
-        lcd.cursor();
-        editMode = true;
-
-        return true;
-    }
-
-    void positionCursor()
-    {
-        lcd.setCursor(LCD_TIME_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_TIME_MAP[confIdx][1]);
-    }
+protected: 
+    void positionCursor() override;
 
 public:
     const uint8_t LCD_TIME_MAP[6][2] = {{0, 1}, {3, 1}, {6, 1}, {UINT8_MAX, 0}, {UINT8_MAX, 0}, {UINT8_MAX, 0}};

@@ -3,32 +3,15 @@
 
 #pragma once
 
-#include <ClockMode.h>
+#include <EditableClockMode.h>
 
-struct ClockConf : public ClockMode {
+struct ClockConf : public EditableClockMode {
 
-        private:
-            boolean editMode = false;
-            uint8_t confIdx = 0;
-
-            boolean switchedToEdit() {
-                if (editMode) {
-                    return false;
-                }
-
-                positionCursor();
-                lcd.cursor();
-                editMode = true;
-
-                return true;
-            }
-
-            void positionCursor() {
-                lcd.setCursor(LCD_DT_MAP[confIdx][0] + LCD_OFFSET + 1, LCD_DT_MAP[confIdx][1]);
-            }
+        protected:
+            void positionCursor() override;
 
         public:
-            ClockConf(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval); 
+            ClockConf(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval); 
 
             void onRefresh(const unsigned long& mills) override;
             void onModeEnter() override;
