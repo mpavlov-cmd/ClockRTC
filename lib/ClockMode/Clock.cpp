@@ -1,11 +1,11 @@
-#include "Clock.h"
+#include <Clock.h>
 #include <LcdUtils.h>
 #include <DS1307M.h>
 
-Clock::Clock(LiquidCrystal_I2C &liqudCristal,DateTimeRtc &dateTime,unsigned int refreshInterval) 
-     : ClockMode(liqudCristal, dateTime, refreshInterval) {}
+Clock::Clock(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval)
+    : ClockMode(liqudCristal, dateTime, refreshInterval) {}
 
-void Clock::onRefresh(const unsigned long& mills)
+void Clock::onRefresh(const unsigned long &mills)
 {
      // Refresh during as time comes or if forse refresh flag is set
      if (!shouldRefresh(mills) && !firstRun && !forsedRefresh)
@@ -23,8 +23,16 @@ void Clock::onRefresh(const unsigned long& mills)
      dt.setValue(rtcReadToInt(REG_MONTH), 4);
      dt.setValue(rtcReadToInt(REG_YEAR), 5);
 
+     if (!outputAllowed) {
+          return;
+     }
+
+     // Do not ineract with LCD above this line 
      if (firstRun)
      {
+          lcd.clear();
+          lcd.noCursor();
+
           uint8_t timeOffset = showSeconds ? LCD_OFFSET : LCD_OFFSET + 3;
           printClockHud(lcd, timeOffset, LCD_OFFSET, showSeconds);
      }
@@ -34,7 +42,7 @@ void Clock::onRefresh(const unsigned long& mills)
      lcdMap = showSeconds ? LCD_DT_MAP : LCD_DT_MAP_NS;
 
      printTimeDate(lcd, dt, lcdMap, LCD_OFFSET);
-   
+
      // Indicate first run ended and drop forceRefresh flag
      firstRun = false;
      forsedRefresh = false;
@@ -43,8 +51,6 @@ void Clock::onRefresh(const unsigned long& mills)
 void Clock::onModeEnter()
 {
      firstRun = true;
-     lcd.clear();
-     lcd.noCursor();
      dt.forseMask();
 }
 
@@ -67,10 +73,15 @@ void Clock::onDownBtnClicked()
 
 void Clock::setShowSeconds(boolean value)
 {
-    showSeconds = value;
+     showSeconds = value;
 }
 
 void Clock::forceNextRefresh()
 {
      forsedRefresh = true;
+}
+
+void Clock::setOutputAllowed(boolean value)
+{
+     outputAllowed = value;
 }

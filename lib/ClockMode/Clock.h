@@ -11,8 +11,9 @@ struct Clock : public ClockMode {
 
             const uint8_t LCD_DT_MAP_NS[6][2] = {{3, 0}, {6, 0}, {UINT8_MAX, 0}, {0, 1}, {3, 1}, {6, 1}};
 
-            boolean showSeconds = true;
+            boolean showSeconds   = true;
             boolean forsedRefresh = false;
+            boolean outputAllowed = true;
 
         public:
             Clock(LiquidCrystal_I2C &liqudCristal, DateTimeRtc &dateTime, unsigned int refreshInterval); 
@@ -26,6 +27,7 @@ struct Clock : public ClockMode {
 
             void setShowSeconds(boolean value);
             void forceNextRefresh();
+            void setOutputAllowed(boolean value);
 };
 
 #endif

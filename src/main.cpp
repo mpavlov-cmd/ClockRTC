@@ -143,10 +143,8 @@ void loop()
     backlight.update(mills);
 
     handleEncoderInput(encoder, onUpBtnClicked, onDownBtnClicked);
-
-    if (!nowSleeping) {
-        modes[modeIdx]->onRefresh(mills);
-    }
+    
+    modes[modeIdx]->onRefresh(mills);
 
     goToSleep(mills);
 }
@@ -209,7 +207,7 @@ void initTime()
     clockConf.toRtc();
 }
 
-void  goToSleep(const unsigned long &mills)
+void goToSleep(const unsigned long &mills)
 {
 
     if (mills < powerUpThreshold)
@@ -225,9 +223,6 @@ void  goToSleep(const unsigned long &mills)
 
         nowSleeping = true;
     }
-
-    // Force refresh clock on the next wakeup
-    mainClock.forceNextRefresh();
 
     // ------ WDT Configuration Start ------
     // Feed the dog
@@ -269,19 +264,31 @@ void stayAwake(const unsigned int& leaveFor)
     powerUpThreshold = millis() + leaveFor;
 }
 
-void powerSaveDisplay(boolean enable, const unsigned long& mills)
-{
-    if (enable) {
-        lcd.noBacklight();
-        digitalWrite(PIN_PB4, LOW);
-    } else {
-        setUpLcd(lcd, LCD_COLS, LCD_ROWS);
-    }
-
+void powerSaveDisplay(boolean enable, const unsigned long &mills)
+{   
+    // Set device to clock mode
     modeIdx = 0;
     mainClock.setShowSeconds(!enable);
-    mainClock.onModeEnter();
-    mainClock.onRefresh(mills);
+    mainClock.setOutputAllowed(!enable);
+
+    if (enable)
+    {
+        lcd.noBacklight();
+        // TODO: Create a setting which would allow to go to deeper sleep, but Alarm will not work
+        // Physically removes power from LCD
+        // digitalWrite(PIN_PB4, LOW);
+    }
+    else
+    {
+        // TODO: Create a setting which would allow to go to deeper sleep, but Alarm will not work
+        // setUpLcd(lcd, LCD_COLS, LCD_ROWS);
+
+        lcd.backlight();
+        // Should be triggered disregard enable flag if display is powered up in sleep mode
+        mainClock.forceNextRefresh();
+        mainClock.onModeEnter();
+        mainClock.onRefresh(mills);
+    }
 }
 
 void enablePCI()

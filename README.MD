@@ -10,6 +10,7 @@ More on Wath Dog Interrupts: https://forum.arduino.cc/t/watchdog-timer-interrupt
 Cheap PCB Assebmly: https://jlcpcb.com/
 
 Motion Sensor: SR602 
+TCA4307 Hot-Swappable I2C Bus Buffer
 
 ## TODO List
 - [x] Add limits for time and and dates
@@ -22,8 +23,9 @@ Motion Sensor: SR602
 - [x] Disable ADC
 - [x] Configure clock only once to run from battery and maintain configuration
 - [x] Add HUD in 2 modes
-- [ ] Refactor and rename clock modes, so there is a dedicated parent class for editable mode
+- [x] Refactor and rename clock modes, so there is a dedicated parent class for editable mode
 - [ ] Actually fire alarm with beeper, in case interrupted - turn off
+- [ ] Add settings screen: Deep Sleep, Backlight Duration, Sound
 - [ ] Display day of week
 
 Optionally: 
