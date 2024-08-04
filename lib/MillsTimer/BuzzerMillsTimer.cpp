@@ -10,15 +10,18 @@ BuzzerMillsTimer::BuzzerMillsTimer(const uint8_t &buzzerPin, boolean isEnabled) 
 void BuzzerMillsTimer::actionUp()
 {
     // For Active Buzzer
-    //const unsigned int NOTE_B7 = 3951;
-    // tone(pin, NOTE_B7);
-    digitalWrite(buzzerPin, HIGH);
+    const unsigned int NOTE_B7 = 3951;
+    tone(buzzerPin, NOTE_B7);
+
+    // For Passive 
+    // digitalWrite(buzzerPin, HIGH);
 }
 
 void BuzzerMillsTimer::actionDown()
 {
     // For Active Buzzer
-    // noTone(pin);
+    noTone(buzzerPin);
 
-    digitalWrite(buzzerPin, LOW);
+    // For Passive
+    // digitalWrite(buzzerPin, LOW);
 }

@@ -105,6 +105,9 @@ void setup()
     // TODO: Remove
     Serial.begin(9600);
 
+    // Charger detecion pin
+    pinMode(PIN_PC3, INPUT);
+
     // Configure LCD Power PIN and LCD Init
     pinMode(PIN_PB4, OUTPUT);
     setUpLcd(lcd, LCD_COLS, LCD_ROWS);
@@ -132,6 +135,14 @@ void loop()
     // Get mills
     unsigned long mills = millis();
     timeEllapsed = mills;
+
+    // TODO: Write normal code
+    boolean charging = digitalRead(PIN_PC3) == HIGH;
+    if (charging) {
+        digitalWrite(PIN_PB5, HIGH); 
+    } else {
+        digitalWrite(PIN_PB5, LOW); 
+    }
 
     // Check just if woke up
     wakeUp(mills);
